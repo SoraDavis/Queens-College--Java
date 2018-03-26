@@ -1,194 +1,85 @@
-
+import javax.swing.JMenuBar;
 import javax.swing.*;
-import java.awt.*;
-import java.util.StringTokenizer;
 
-public class DateGUI1 
+public class DateGUI1 extends JFrame 
 {
 
-	static final int LIST_SIZE = 20;
-
 	static String date;
-	static Date212_1[] dateList;
-	static int dateSize;
-	static TextFileInput inFile;
-	static String inFileName = "DateTest.txt";
 	static JFrame myFrame;
-	static Date212_1 dateObject;
-	public static StringTokenizer myTokens;
+	static UnsortedDateList list;
+	static SortedDateList sortList;
+	static JMenuBar menuBar;
+	static JMenu fileMenu;
+	static FileMenuHandler fmh;
 
-	public static void initialize() 
+	public DateGUI1() 
 	{
 		date = "";
-		dateList = new Date212_1[LIST_SIZE];
-		dateSize = 0;
-		dateObject = null;
-		inFile = new TextFileInput(inFileName);
+		list = new UnsortedDateList();
+		sortList = new SortedDateList();
 		myFrame = new JFrame();
 		myFrame.setSize(400, 200);
 		myFrame.setLocation(100, 100);
 		myFrame.setTitle("Dates");
+		createMenu();
 		myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	public static void readDatesFromFile(String fileName) 
+	public static void storeDate(Date212_1 d) 
 	{
-
-		String date;
-
-		date = inFile.readLine();
-
-		//While there are still more lines, read in from file and tokenize to seperate each date
-		//Store dates into dateList array as they are read in
-		while (date != null) {
-
-			myTokens = new StringTokenizer(date, ",");
-
-			while (myTokens.hasMoreTokens()) 
-			{
-
-				date = myTokens.nextToken();
-
-				dateObject = new Date212_1(date);
-
-				if (!isValidDate(dateObject)) 
-				{
-					throw new IllegalArgumentException("Invalid date");
-				}
-
-				storeDate(dateObject, dateList);
-
-			}
-			
-			date = inFile.readLine();
+		// Check that the date is valid
+		if (isValidDate(d)) 
+		{
+			//call 'add' function from Sorted and Unsorted classes (each one adds Nodes differently...)
+			list.add(d);
+			sortList.add(d);
 		}
 	}
 
-	public static void storeDate(Date212_1 d, Date212_1[] list) 
+	public void createMenu() 
 	{
-		//Check that the date and the list are valid
-		if (isValidDate(d) && isValidList(list)) 
-		{
-			list[dateSize++] = d;
-		}
-	}
+		JMenuBar menuBar = new JMenuBar();
+		JMenu fileMenu = new JMenu("File");
+		JMenuItem item;
+		FileMenuHandler fmh = new FileMenuHandler(this);
 
-	public static void printDateList(Date212_1[] list, int size)
-	{
+		//create an item with an action listener (File Menu Handler) and add to File Menu
+		item = new JMenuItem("Open");
+		item.addActionListener(fmh);
+		fileMenu.add(item);
 
-		if (!isValidList(list)) 
-		{
-			throw new IllegalArgumentException("Invalid list)");
-		}
+		fileMenu.addSeparator();
 
-		//Check date for validity, and then use the toString and getters (both from Date212_1 class) to print to console
-		//This method is just for checking- it does not need to be called from the main method, in this particular project
-		for (int i = 0; i < size; i++) 
-		{
-			if (!isValidDate(list[i])) 
-			{
-				System.out.println("Invalid Date: " + list[i].getOriginal());
-				
-			} 
-			else 
-			{
-				System.out.println(list[i].toString(list[i].getYear(), list[i].getMonth(), list[i].getDay()));
-			}
-		}
-	}
+		//create another item with action listener and add
+		item = new JMenuItem("Quit");
+		item.addActionListener(fmh);
+		fileMenu.add(item);
 
-	public static void printDateToJFrame(JFrame jf, Date212_1[] list, int size)
-	{
+		//add a JMenuBar to the current jFrame and add the file menu to it
+		this.setJMenuBar(menuBar);
+		menuBar.add(fileMenu);
 
-		//Create a new jFrame with a ContentPane, adding two textAreas to the grid
-		//Call the sort and print the sorted array to the JFrame (append to textArea)- Also print original string
-		if (!isValidList(list)) 
-		{
-			throw new IllegalArgumentException("Invalid list)");
-		}
-
-		Container myContentPane = jf.getContentPane();
-		jf.setLayout(new GridLayout(1, 2));
-
-		TextArea tA1 = new TextArea();
-		TextArea tA2 = new TextArea();
-
-		myContentPane.add(tA1);
-		myContentPane.add(tA2);
-
-		Date212_1[] sortedArray = selectionSort(list, dateSize);
-
-		for (int i = 0; i < size; i++) 
-		{
-			if (!isValidDate(list[i])) 
-			{
-				tA2.append("Invalid Date: " + sortedArray[i].getOriginal() + "\n");
-			}
-
-			else 
-			{
-				tA1.append(sortedArray[i].getOriginal() + "\n");
-				tA2.append(sortedArray[i].toString(sortedArray[i].getYear(), sortedArray[i].getMonth(),
-						sortedArray[i].getDay()) + "\n");
-			}
-		}
-		jf.setVisible(true);
+		this.setSize(400, 200);
+		this.setLocation(100, 100);
+		this.setTitle("Dates");
+		setVisible(true);
 	}
 
 	public static boolean isValidDate(Date212_1 d) 
 	{
-		//Make sure date is 8 digits in length (use getOriginal to check original string sent to Date212_1)
-		if (d.getOriginal().length() != 8) 
-		{
+		// Make sure date is 8 digits in length (use getOriginal to check original
+		// string sent to Date212_1)
+		if (d.getOriginal().length() != 8) {
 			throw new IllegalArgumentException("The date length must be 8.");
 		}
 
 		return true;
 	}
 
-	public static boolean isValidList(Date212_1[] list) 
+	public static String getValue(DateNode dN) 
 	{
-		if (list == null) 
-		{
-			return false;
-		}
 
-		if (dateSize == list.length)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	private static Date212_1[] selectionSort(Date212_1[] array, int length) 
-	{
-		//Compare two dates in the array and set lowest one to new indexLowest variable
-		//Swap new lowest with old lowest
-		//Use compareTo and equals methods from Date212_1 class
-		//Return the now sorted array
-		for (int i = 0; i < length - 1; i++) 
-		{
-			int indexLowest = i;
-
-			for (int j = i + 1; j < length; j++)
-			{
-
-				if (array[j].compareTo(array[indexLowest]))
-				{
-					indexLowest = j;
-				}
-			}
-
-			if (!array[indexLowest].equals(array[i])) 
-			{
-				Date212_1 temp = array[indexLowest];
-				array[indexLowest] = array[i];
-				array[i] = temp;
-			}
-		}
-
-		return array;
+		return dN.data.toString(dN.data.getYear(), dN.data.getMonth(), dN.data.getDay());
 	}
 
 }
