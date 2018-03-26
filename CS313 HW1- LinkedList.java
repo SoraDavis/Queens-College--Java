@@ -30,7 +30,6 @@ public class LinkedList<E> implements List<E>, Stack<E> {
    // or throws an IndexOutOfBoundsException if the index is out of range.
    public E remove(int index) {
 	   
-	   //debug: for some reason the first remove removes the 5.....that should be index 1, not 0
 	   if (index < 0 || index > size-1)
 	         throw new IndexOutOfBoundsException();
       
@@ -128,7 +127,6 @@ public class LinkedList<E> implements List<E>, Stack<E> {
    // Returns a string representation of the linked list.
    public String toString() {
 
-	   //debug: it is printing "null" before e/t
 	   String string = "[ ";
 	   Node<E> s = first.next;
 	   
